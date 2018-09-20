@@ -5,7 +5,7 @@ import pandas as pd
 import sklearn
 
 from pandas_datareader import data as web
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier as RFC
 from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import LatentDirichletAllocation as LDA
 from sklearn.metrics import confusion_matrix
@@ -41,10 +41,10 @@ def createLaggedSeries(symbol,startDate,endDate,lags=5):
 if __name__ =="__main__":
 	print("Hit Rates/Confusion Matrices:\n")
 	
-	for i in range(0,10):
-		year = 2017-i
+	for i in range(0,4):
+		year = 2005-i
 		print("Year:%s" %year)
-		snpret = createLaggedSeries("^GSPC",datetime.datetime(year-5,1,10),datetime.datetime(year,12,31),5)
+		snpret = createLaggedSeries("^GSPC",datetime.datetime(year-4,1,10),datetime.datetime(year,12,31),5)
 		x = snpret[["Lag1","Lag2"]]
 		y = snpret["Direction"]
 
@@ -58,7 +58,14 @@ if __name__ =="__main__":
 		
 
 		
-		models=[("LR",LogisticRegression())]
+		models=[
+			("LR",LogisticRegression()),
+			#("LDA",LDA()),
+			("QDA", QDA()),
+			("LSVC", LinearSVC()),
+			("RSVM",SVC(C=1000000.0, cache_size=200,class_weight=None, coef0=0.0,degree=3,gamma=0.0001,kernel='rbf',max_iter=-1,probability=False,random_state=None,shrinking=True,tol=0.001,verbose=False)),
+			("RF",RFC(n_estimators=1000,criterion="gini",max_depth=None,min_samples_split=2,min_samples_leaf=1,max_features='auto',bootstrap=True,oob_score=False,n_jobs=1,random_state=None,verbose=0))
+		]
 		for m in models:
 			m[1].fit(xTrain,yTrain)
 			pred = m[1].predict(xTest)
